@@ -1,0 +1,39 @@
+File:   README
+Date:   12/23/2016
+Author: Rishikesh Vaishnav
+
+DESCRIPTION:
+
+    This program can be used to visualize the Ant System (AS) variant of the
+    Ant Colony Optimization (ACO) heuristic to find optimized solutions to 
+    the TSP. 
+
+    The controls are as follows:
+        r - replay
+        n - play new, randomized tour
+        p - toggle display pheromone trails
+        g - toggle display best greedy algorithm tour
+        a - toggle display best-so-far ACO tour
+
+    Blue tour - best greedy algorithm tour
+    Green tour - best-so-far ACO tour
+
+HOW TO RUN:
+
+    To run this program, you can do either of the following options:
+
+    OPTION 1:
+    1. Download and install Processing (https://processing.org/download/).
+    2. Save the files into a folder called "TSPVisualizerACO".
+    3. Run Processing.
+    4. In Processing, go to File->Open, and open the file 
+    "TSPVisualizerACO.pde" inside of the folder "TSPVisualizerACO".
+    5. Run the program.
+
+    Option 2:
+    1. Go to:
+    https://drive.google.com/open?id=0Bxgba8GLRorCcjRQbVB5RlE2Vmc
+    2. Download the .zip folder that contains the application for your 
+    operating system
+    3. Decompress the files 
+    4. Run the program "TSPVisualizerACO".
