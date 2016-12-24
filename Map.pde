@@ -46,10 +46,6 @@ class Map
     {
         /* set the locations */
         this.setLocs( init_locs );
-    
-        /* set the length of a greedy tour */
-        greedy_length = TSPAlgorithms.get_tour_length( 
-            TSPAlgorithms.sol_greedy( locs ) );
     }
 
     /**
@@ -63,6 +59,10 @@ class Map
 
         /* set the paths */
         this.setPaths( this.getAllPaths( this.getLocs() ) );
+    
+        /* set the length of a greedy tour */
+        this.greedy_length = TSPAlgorithms.get_tour_length( 
+            TSPAlgorithms.sol_greedy( locs ) );
 
         /* set the paths that are part of the best greedy  tour */
         this.setGreedyPaths();
