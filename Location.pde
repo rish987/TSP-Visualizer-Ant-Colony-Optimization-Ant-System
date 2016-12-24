@@ -15,7 +15,7 @@
 class Location
 {
     /* color of locations */
-    private static final int LOC_COLOR = 100;
+    private static final int LOC_COLOR = 200;
 
     /* size of locations */
     public static final float LOC_SIZE = 10;
@@ -128,7 +128,8 @@ class Location
     {
         /* use black stroke */
         stroke( 0 );
-        
+        strokeWeight( 1 );
+
         /* reset color */
         fill( LOC_COLOR );
 

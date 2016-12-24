@@ -34,8 +34,20 @@ class Path
     public static final int MIN_PATH_COLOR = 0;
     public static final int MAX_PATH_COLOR = 230;
 
+    /* the color to draw this path if it is part of the ACO best tour */
+    public final int[] ACO_BEST_COLOR = { 140, 180, 120 };
+
+    /* the color to draw this path if it is part of the Greedy best tour */
+    public final int[] GREEDY_BEST_COLOR = { 120, 210, 210 };
+
     /* hypothetical maximum pheromone */
-    public static final double MAX_PHER = 30;
+    public static final double MAX_PHER = 40;
+
+    /* is this path part of the best ACO tour? */
+    private boolean from_best_ACO_tour = false;
+
+    /* is this path part of the best Greedy tour? */
+    private boolean from_best_greedy_tour = false;
 
     /**
      * Create this path with the specified start and end points.
@@ -104,6 +116,26 @@ class Path
     public void setPheromone ( double new_pheromone )
     {
         this.pheromone = new_pheromone;
+    }
+
+    /**
+     * Sets whether of not this path is  part of the best ACO tour.
+     *
+     * @param new_from_best_ACO_tour is this path part of the best ACO tour?
+     */
+    public void setFromBestACOTour ( boolean new_from_best_ACO_tour )
+    {
+        this.from_best_ACO_tour = new_from_best_ACO_tour;
+    }
+    
+    /**
+     * Sets whether of not this path is  part of the best Greedy tour.
+     *
+     * @param new_from_best_greedy_tour is this path part of the best Greedy tour?
+     */
+    public void setFromBestGreedyTour ( boolean new_from_best_greedy_tour )
+    {
+        this.from_best_greedy_tour = new_from_best_greedy_tour;
     }
 
     /** 
@@ -177,6 +209,26 @@ class Path
     }
 
     /**
+     * Returns whether of not this path is  part of the best ACO tour.
+     *
+     * @return is this path part of the best ACO tour?
+     */
+    public boolean getFromBestACOTour ()
+    {
+        return this.from_best_ACO_tour;
+    }
+
+    /**
+     * Returns whether of not this path is  part of the best Greedy tour.
+     *
+     * @return is this path part of the best Greedy tour?
+     */
+    public boolean getFromBestGreedyTour ()
+    {
+        return this.from_best_greedy_tour;
+    }
+    
+    /**
      * Returns the weight of this path, used for calculation of probabilities
      * when ants are choosing between paths.
      *
@@ -211,20 +263,66 @@ class Path
     }
     
     /**
-     * Update the graphical representation of this path;
+     * Update the graphical representation of this path for the pheromone
+     * trail.
      */
-    public void update ()
+    public void updatePheromoneDisp ()
     {
         /* the color to use */
-        int newColor = ( int ) ( MAX_PATH_COLOR - ( this.getPheromone() * 1000 / 
+        int this_color = ( int ) ( MAX_PATH_COLOR - ( this.getPheromone() * 1000 / 
             MAX_PHER ) * ( MAX_PATH_COLOR - MIN_PATH_COLOR ) );
 
         /* there is enough pheromone to make this path worth showing */
         if ( this.getPheromone() > 1.0e-3 )
         {
             /* set path color */
-            stroke( ( int ) ( newColor ) );
+            stroke( ( int ) ( this_color ) );
+            strokeWeight( 1 );
 
+            /* draw the path */
+            line( ( float ) ( this.getStartPoint().getX() + TSPAlgorithms.ORIGIN_X ),
+                  ( float ) ( this.getStartPoint().getY() + TSPAlgorithms.ORIGIN_Y ),
+                  ( float ) ( this.getEndPoint().getX() + TSPAlgorithms.ORIGIN_X ),
+                  ( float ) ( this.getEndPoint().getY() + TSPAlgorithms.ORIGIN_Y ) );
+        }
+    }
+
+    /**
+     * Update the graphical representation of this path for the greedy
+     * trail.
+     */
+    public void updateGreedyDisp ()
+    {
+        /* this lucky path is part of the best Greedy solution found so far */
+        if ( this.getFromBestGreedyTour() )
+        {
+            /* make this line heavier */
+            strokeWeight( 10 );
+
+            /* set path color */
+            stroke( GREEDY_BEST_COLOR[ 0 ], GREEDY_BEST_COLOR[ 1 ], GREEDY_BEST_COLOR[ 2 ] );
+            /* draw the path */
+            line( ( float ) ( this.getStartPoint().getX() + TSPAlgorithms.ORIGIN_X ),
+                  ( float ) ( this.getStartPoint().getY() + TSPAlgorithms.ORIGIN_Y ),
+                  ( float ) ( this.getEndPoint().getX() + TSPAlgorithms.ORIGIN_X ),
+                  ( float ) ( this.getEndPoint().getY() + TSPAlgorithms.ORIGIN_Y ) );
+        }
+    }
+
+    /**
+     * Update the graphical representation of this path for the ACO
+     * trail.
+     */
+    public void updateACODisp ()
+    {
+        /* this lucky path is part of the best ACO solution found so far */
+        if ( this.getFromBestACOTour() )
+        {
+            /* make this line heavier */
+            strokeWeight( 6 );
+
+            /* set path color */
+            stroke( ACO_BEST_COLOR[ 0 ], ACO_BEST_COLOR[ 1 ], ACO_BEST_COLOR[ 2 ] );
             /* draw the path */
             line( ( float ) ( this.getStartPoint().getX() + TSPAlgorithms.ORIGIN_X ),
                   ( float ) ( this.getStartPoint().getY() + TSPAlgorithms.ORIGIN_Y ),

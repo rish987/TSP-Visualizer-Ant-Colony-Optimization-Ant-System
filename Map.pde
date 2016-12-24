@@ -15,14 +15,26 @@
 class Map 
 {
     /* the locations of this map */
-    Location[] locs;
+    private Location[] locs;
 
     /* the paths of this map, as represented in a 2D array of paths between
      * locations with different indices */
-    Path[][] paths;
+    private Path[][] paths;
 
     /* is this map currently animating ACO? */
-    boolean animating_ACO = false;
+    private boolean animating_ACO = false;
+
+    /* should this map show greedy paths? */
+    private boolean show_greedy = true;
+
+    /* should this map show ACO paths? */
+    private boolean show_ACO = true;
+
+    /* should this map show pheromone paths? */
+    private boolean show_pheromone = true;
+
+    /* the length of the best greedy tour through the given locations */
+    private double greedy_length = 0;
 
     /** 
      * Initializes this map with the specified Locations, and automatically
@@ -34,6 +46,10 @@ class Map
     {
         /* set the locations */
         this.setLocs( init_locs );
+    
+        /* set the length of a greedy tour */
+        greedy_length = TSPAlgorithms.get_tour_length( 
+            TSPAlgorithms.sol_greedy( locs ) );
     }
 
     /**
@@ -47,6 +63,9 @@ class Map
 
         /* set the paths */
         this.setPaths( this.getAllPaths( this.getLocs() ) );
+
+        /* set the paths that are part of the best greedy  tour */
+        this.setGreedyPaths();
     }
     
     /**
@@ -57,6 +76,26 @@ class Map
     public Location[] getLocs ()
     {
         return this.locs;
+    }
+
+    /**
+     * Returns the length of the best greedy tour.
+     *
+     * @return the length of the best greedy tour
+     */
+    public double getGreedyLength () 
+    {
+        return this.greedy_length;
+    }
+
+    /**
+     * Returns the length of the best ACO tour.
+     *
+     * @return the length of the best ACO tour
+     */
+    public double getACOLength () 
+    {
+        return this.min_tour_dist;
     }
 
     /**
@@ -77,6 +116,50 @@ class Map
     public Path[][] getPaths ()
     {
         return this.paths;
+    }
+
+    /**
+     * Sets the paths that are part of the best greedy tour.
+     */
+    public void setGreedyPaths ()
+    {
+        /* get the greedy tour */
+        Location[] greedy_tour = TSPAlgorithms.sol_greedy( this.getLocs() );
+
+        /* to store the indices in locs of the locations of the greedy tour */
+        int[] greedy_tour_inds = new int[ this.getLocs().length ];
+
+        /* go through all of the greedy tour locations */
+        for ( int i = 0; i < greedy_tour.length; i++ )
+        {
+            /* go through all of the locations */
+            for ( int j = 0; j < this.getLocs().length; j++ )
+            {
+                /* this location is equal to the current greedy tour location */
+                if ( greedy_tour[ i ] == this.getLocs()[ j ] )
+                {
+                    /* this is the index to use */
+                    greedy_tour_inds[ i ] = j;
+
+                    /* go to the next iteration because we already found a
+                     * match */
+                    break;
+                }
+            }
+        }
+        /* go through the greedy tour inds */
+        for ( int i = 0; i < greedy_tour_inds.length - 1; i++ )
+        {
+            /* this path is from the best greedy tour */
+            paths[ greedy_tour_inds[ i ] ]
+                [ greedy_tour_inds[ i + 1 ] ]
+                .setFromBestGreedyTour( true );
+        }
+        /* the path from the last location to first is also from
+         * the best so far ACO tour */
+        paths[ greedy_tour_inds[ greedy_tour_inds.length - 1 ] ]
+            [ greedy_tour_inds[ 0 ]  ].setFromBestGreedyTour( true );
+
     }
 
     /**
@@ -110,6 +193,30 @@ class Map
         }
 
         return paths;
+    }
+
+    /** 
+     * Toggle whether or not this map is showing greedy paths
+     */
+    public void toggleShowGreedy ()
+    {
+        this.show_greedy = !this.show_greedy;
+    }
+
+    /** 
+     * Toggle whether or not this map is showing ACO paths
+     */
+    public void toggleShowACO ()
+    {
+        this.show_ACO = !this.show_ACO;
+    }
+
+    /** 
+     * Toggle whether or not this map is showing pheromone paths
+     */
+    public void toggleShowPheromone ()
+    {
+        this.show_pheromone = !this.show_pheromone;
     }
 
     /**
@@ -288,29 +395,95 @@ class Map
             for ( int ant = 0; ant < m; ant++ )
             {
                 /* the length of this ant's tour */
-                double this_ant_tour_length = TSPAlgorithms.get_tour_length( 
-                    TSPAlgorithms.get_tour_from_inds( locs, 
-                    ant_tour_inds[ ant ] ) );
+                double this_ant_tour_length = TSPAlgorithms.
+                    get_tour_length( TSPAlgorithms.get_tour_from_inds( 
+                                locs, ant_tour_inds[ ant ] ) );
 
                 /* go through all paths in this ant's tour */
                 for ( Path path : 
-                    TSPAlgorithms.get_all_paths_in_tour( paths, 
-                    ant_tour_inds[ ant ] ) )
+                    TSPAlgorithms.get_all_paths_in_tour( 
+                    paths, ant_tour_inds[ ant ] ) )
                 {
                     /* add pheromone to this path */
                     path.addPheromone( 1 / this_ant_tour_length );
                 }
+
+                /* this distance is less than the minimum so far */
+                if ( this_ant_tour_length < min_tour_dist )
+                {
+                    /* reset the minimum and the solution */
+                    min_tour_dist = this_ant_tour_length;
+                    sol_tour_inds = Arrays.copyOf( 
+                        ant_tour_inds[ ant ], ant_tour_inds.length );
+
+                    /* go through all of the paths */
+                    for ( int row = 0; row < this.getPaths().length; row++ )
+                    {
+                        for ( int col = row + 1; col < 
+                            this.getPaths()[ row ].length; col++ )
+                        {
+                            /* reset this path to not be from the best so far
+                             * ACO tour */
+                            paths[ row ][ col ].setFromBestACOTour( false );
+                        }
+                    }
+
+                    /* go through the solution tour inds */
+                    for ( int i = 0; i < sol_tour_inds.length - 1; i++ )
+                    {
+                        /* this path is from the best so far ACO tour */
+                        paths[ sol_tour_inds[ i ] ]
+                            [ sol_tour_inds[ i + 1 ] ]
+                            .setFromBestACOTour( true );
+                    }
+                    /* the path from the last location to first is also from
+                     * the best so far ACO tour */
+                    paths[ sol_tour_inds[ sol_tour_inds.length - 1 ] ]
+                        [ sol_tour_inds[ 0 ]  ].setFromBestACOTour( true );
+                }
             }
         }
 
-        /* go through all of the paths */
-        for ( int row = 0; row < this.getPaths().length; row++ )
+        /* should show greedy paths */
+        if ( this.show_greedy )
         {
-            for ( int col = row + 1; col < this.getPaths()[ row ].length;
-                col++ )
+            /* go through all of the paths */
+            for ( int row = 0; row < this.getPaths().length; row++ )
             {
-                /* update this path */
-                this.getPaths()[ row ][ col ].update();
+                for ( int col = row + 1; col < this.getPaths()[ row ].length;
+                    col++ )
+                {
+                    /* update this path's greedy tour display */
+                    this.getPaths()[ row ][ col ].updateGreedyDisp();
+                }
+            }
+        }
+        /* should show ACO paths */
+        if ( this.show_ACO )
+        {
+            /* go through all of the paths */
+            for ( int row = 0; row < this.getPaths().length; row++ )
+            {
+                for ( int col = row + 1; col < this.getPaths()[ row ].length;
+                    col++ )
+                {
+                    /* update this path's ACO tour display */
+                    this.getPaths()[ row ][ col ].updateACODisp();
+                }
+            }
+        }
+        /* should show pheromone paths */
+        if ( this.show_pheromone )
+        {
+            /* go through all of the paths */
+            for ( int row = 0; row < this.getPaths().length; row++ )
+            {
+                for ( int col = row + 1; col < this.getPaths()[ row ].length;
+                    col++ )
+                {
+                    /* update this path's pheromone tour display */
+                    this.getPaths()[ row ][ col ].updatePheromoneDisp();
+                }
             }
         }
 
@@ -327,6 +500,9 @@ class Map
 
     /* the length of a tour constructed by the nearest neighbor solution */
     private double C_nn;
+
+    /* the minimum tour distance so far */
+    double min_tour_dist = C_nn;
 
     /* the number of ants to send out in one iteration */
     private int m;
@@ -367,6 +543,9 @@ class Map
         /* the length of a tour constructed by the nearest neighbor solution */
         C_nn = TSPAlgorithms.get_tour_length( 
             TSPAlgorithms.sol_greedy( locs ) );
+
+        /* the minimum tour distance so far */
+        min_tour_dist = Double.MAX_VALUE;
 
         /* the number of ants to send out in one iteration */
         m = n;
