@@ -49,7 +49,7 @@ class Map
     }
 
     /**
-     * Sets the locations used in this map.
+     * Sets the locations used in this map and re-animates the tour.
      *
      * @param new_locs the locations in this map
      */
@@ -57,15 +57,22 @@ class Map
     {
         this.locs = new_locs;
 
-        /* set the paths */
-        this.setPaths( this.getAllPaths( this.getLocs() ) );
-    
-        /* set the length of a greedy tour */
-        this.greedy_length = TSPAlgorithms.get_tour_length( 
-            TSPAlgorithms.sol_greedy( locs ) );
+        /* there is more than one location */
+        if ( this.getLocs().length > 1 )
+        {
+            /* set the paths */
+            this.setPaths( this.getAllPaths( this.getLocs() ) );
+        
+            /* set the length of a greedy tour */
+            this.greedy_length = TSPAlgorithms.get_tour_length( 
+                TSPAlgorithms.sol_greedy( locs ) );
 
-        /* set the paths that are part of the best greedy  tour */
-        this.setGreedyPaths();
+            /* set the paths that are part of the best greedy  tour */
+            this.setGreedyPaths();
+        }
+
+        /* re-animate the tour */
+        this.animateACO();
     }
     
     /**
@@ -123,9 +130,62 @@ class Map
 
         /* reset the locations */
         this.setLocs( new_locs );
+    }
 
-        /* restart the animation */
-        this.animateACO();
+    /**
+     * Removes the location that contains the specified location coordinates
+     * and reanimates the tour if there is a location there.
+     *
+     * @param loc the location to check
+     */
+    public void removeLoc ( Location loc )
+    {
+        /* there are no locations to remove */
+        if ( this.getLocs().length < 1 )
+        {
+            /* exit */
+            return;
+        }
+
+        /* the new locs */
+        Location[] new_locs = new Location[ this.getLocs().length - 1 ];
+
+        /* index in new_locs */
+        int new_locs_ind = 0;
+
+        /* has a location already been removed? */
+        boolean loc_removed = false;
+
+        /* go through all of the locations */
+        for ( int loc_list_ind = 0; loc_list_ind < this.getLocs().length;
+             loc_list_ind++ )
+        {
+            /* this location contains loc and a location has not already been
+             * removed */
+            if ( !loc_removed && this.getLocs()[ loc_list_ind ].contains( loc ) )
+            {
+                /* a location has been removed */
+                loc_removed = true;
+
+                /* do not add this location to the new_locs */
+                continue;
+            }
+
+            /* a location has not been removed and all of the locations have
+             * been searched */
+            if ( !loc_removed && loc_list_ind == this.getLocs().length - 1 )
+            {
+                /* no location was removed, so return */
+                return;
+            }
+
+            /* add this location to new_locs */
+            new_locs[ new_locs_ind ] = this.getLocs()[ loc_list_ind ];
+            new_locs_ind++;
+        }
+
+        /* reset the locs */
+        this.setLocs( new_locs );
     }
 
     /**
@@ -244,6 +304,21 @@ class Map
      */
     public void update ()
     {
+        /* there is only one location */
+        if ( this.getLocs().length == 1 )
+        {
+            /* draw the location and return */
+            this.getLocs()[ 0 ].update();
+            return;
+        }
+
+        /* there are no locations */
+        if ( this.getLocs().length < 1 )
+        {
+            /* don't do anything, return */
+            return;
+        }
+
         /* this map is currently animating ACO, so send out a pack of ants */
         /* continue sending ants until stagnating state is reached */
         if ( animating_ACO )
@@ -556,6 +631,13 @@ class Map
      */
     public void animateACO ()
     {
+        /* there is only one location or none */
+        if ( this.getLocs().length <= 1 )
+        {
+            /* return, because there is nothing to animate */
+            return;
+        }
+         
         /* this map is now animating ACO */
         animating_ACO = true;
 

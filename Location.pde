@@ -98,6 +98,20 @@ class Location
     }
 
     /**
+     * Returns whether or not this location contains another specified
+     * location.
+     *
+     * @param loc the location to check
+     *
+     * @return does this location contain loc?
+     */
+    public boolean contains ( Location loc )
+    {
+            return TSPAlgorithms.get_distance_between( loc,
+                this ) < ( LOC_SIZE / 2 );
+    }
+
+    /**
      * Returns whether or not this Location and another given Location are 
      * equal.
      *

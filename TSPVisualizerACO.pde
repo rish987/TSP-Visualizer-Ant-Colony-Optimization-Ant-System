@@ -68,9 +68,6 @@ void setup ()
 
     /* initialize the status panel */
     panel = new StatusPanel( OFFSET, OFFSET * 4 + RAND_MAP_WIDTH, this_map );
-
-    /* animate */
-    this_map.animateACO();
 }
 
 /**
@@ -144,14 +141,11 @@ void keyTyped ()
 
         /* reset the locations */
         this_map.setLocs( rand_locs );
-
-        /* toggle whether or not we are showing pheromone trails */
-        this_map.animateACO();
     }
     /* the 'r' key was typed, so restart this simulation */
     if ( key == 'r' )
     { 
-        /* toggle whether or not we are showing pheromone trails */
+        /* re-animate the tour */
         this_map.animateACO();
     }
     /* the 'l' key was pressed */
@@ -159,5 +153,18 @@ void keyTyped ()
     {
         /* add a location at the mouse location */
         this_map.addLoc( new Location( mouseX - OFFSET * 2, mouseY - OFFSET * 2 ) );
+    }
+    /* the 'd' key was pressed */
+    if ( key == 'd' )
+    {
+        /* delete the location at the mouse location, if there is one */
+        this_map.removeLoc( 
+                new Location( mouseX - OFFSET * 2, mouseY - OFFSET * 2 ) );
+    }
+    /* the 'c' key was pressed */
+    if ( key == 'c' )
+    {
+        /* clear all locations */
+        this_map.setLocs( new Location[ 0 ] );
     }
 }

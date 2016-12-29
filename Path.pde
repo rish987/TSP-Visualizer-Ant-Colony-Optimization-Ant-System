@@ -272,6 +272,13 @@ class Path
         int this_color = ( int ) ( MAX_PATH_COLOR - ( this.getPheromone() * 1000 / 
             MAX_PHER ) * ( MAX_PATH_COLOR - MIN_PATH_COLOR ) );
 
+        /* the actual pheromone is beyond the hypothetical max */
+        if ( this.getPheromone() * 1000 >= MAX_PHER )
+        {
+            /* use the darkest color */
+            this_color = MIN_PATH_COLOR;
+        }
+
         /* there is enough pheromone to make this path worth showing */
         if ( this.getPheromone() > 1.0e-3 )
         {
