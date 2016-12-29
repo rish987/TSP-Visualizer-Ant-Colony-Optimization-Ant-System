@@ -12,8 +12,11 @@ DESCRIPTION:
         r - replay
         n - play new, randomized tour
         p - toggle display pheromone trails
-        g - toggle display best greedy algorithm tour
         a - toggle display best-so-far ACO tour
+        g - toggle display best greedy algorithm tour
+        l - add location at mouse location
+        d - remove location at mouse location
+        c - clear all locations
 
     Blue tour - best greedy algorithm tour
     Green tour - best-so-far ACO tour

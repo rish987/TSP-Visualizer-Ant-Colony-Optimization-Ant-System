@@ -122,6 +122,14 @@ class Map
      */
     public void addLoc ( Location loc )
     {
+        /* loc is not within bounds */
+        if ( ( loc.getX() < 0 || loc.getX() > RAND_MAP_WIDTH ) 
+            || ( loc.getY() < 0 || loc.getY() > RAND_MAP_HEIGHT ) )
+        {
+            /* don't add a location */
+            return;
+        }
+
         /* the new locations */
         Location[] new_locs = Arrays.copyOf( locs, locs.length + 1 );
 

@@ -28,9 +28,11 @@ class StatusPanel
     private String notes = 
         "Controls:"
         + "\nr - restart; n - randomize and restart;"
-        + "\np - toggle show pheromone trails;"
-        + " a - toggle show best-so-far ACO tour (green);"
-        + "\ng - toggle show best greedy algorithm tour (blue);";
+        + " p - toggle show pheromone trails;"
+        + "\na - toggle show best-so-far ACO tour (green);"
+        + " g - toggle show best greedy tour (blue);"
+        + "\nl - add location at mouse; d - delete location at mouse;"
+        + "  c - clear locations";
 
     /* the map this panel uses */
     private Map map;
