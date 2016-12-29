@@ -154,4 +154,10 @@ void keyTyped ()
         /* toggle whether or not we are showing pheromone trails */
         this_map.animateACO();
     }
+    /* the 'l' key was pressed */
+    if ( key == 'l' )
+    {
+        /* add a location at the mouse location */
+        this_map.addLoc( new Location( mouseX - OFFSET * 2, mouseY - OFFSET * 2 ) );
+    }
 }

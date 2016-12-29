@@ -109,6 +109,26 @@ class Map
     }
 
     /**
+     * Adds a location to the map and restarts the animation.
+     *
+     * @param loc the location to add
+     */
+    public void addLoc ( Location loc )
+    {
+        /* the new locations */
+        Location[] new_locs = Arrays.copyOf( locs, locs.length + 1 );
+
+        /* add loc to the end of this list */
+        new_locs[ locs.length ] = loc;
+
+        /* reset the locations */
+        this.setLocs( new_locs );
+
+        /* restart the animation */
+        this.animateACO();
+    }
+
+    /**
      * Returns the paths on this map.
      *
      * @return the paths on this map
@@ -323,8 +343,8 @@ class Map
                         }
                     }
 
-                    /* the weight is so small that it is essentially 0 */
-                    if ( total_weight == 0.0 )
+                    /* NaNs were found */
+                    if ( num_NaNs > 0 )
                     {
                         /* go through each of the locations */
                         for ( int locs_i = 0; locs_i < locs.length; locs_i++ )
@@ -356,6 +376,8 @@ class Map
                     {
                         e.printStackTrace();
                         System.out.println( Arrays.toString( probs ) );
+
+                        System.exit( 0 );
                     }
 
                 
@@ -583,7 +605,7 @@ class Map
         beta = 4;
 
         /* to store the indices of the end locations of each path */
-        locs_inds = new int[ locs.length ];
+        locs_inds = new int[ this.getLocs().length ];
 
         /* set locs_inds */
         for ( int i = 0; i < locs_inds.length; i++ )
@@ -593,6 +615,6 @@ class Map
 
         /* to store the probabilities of each path to other
          * locations from the given location */
-        probs = new double[ locs.length ];
+        probs = new double[ this.getLocs().length ];
     }
 }
